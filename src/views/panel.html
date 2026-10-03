@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cursor 配额与用量监控</title>
+  <title>Cursor quota and usage</title>
   <link rel="stylesheet" href="{{cssUri}}">
 </head>
 <body>
@@ -12,17 +12,17 @@
   <div class="top-bar">
     <div class="top-title">
       <span class="top-title-icon">⚡</span>
-      <span>Cursor 实时配额与用量</span>
+      <span>Cursor quota and usage</span>
     </div>
     <div class="top-actions">
-      <button class="btn-icon" id="btnRefresh" title="点击重新拉取 Cursor 官方实时配额与消耗">
+      <button class="btn-icon" id="btnRefresh" title="Refresh quota and usage from Cursor">
         <span id="refreshIcon" class="refresh-icon">🔄</span>
-        <span id="lblRefresh">刷新</span>
+        <span id="lblRefresh">Refresh</span>
       </button>
     </div>
   </div>
 
-  <!-- Account Card (Matches Antigravity Design) -->
+  <!-- Account Card -->
   <div class="account-card" id="cardAccount">
     <div class="account-left">
       <div class="account-avatar" id="avatarContainer">
@@ -31,18 +31,18 @@
       </div>
       <div class="account-details">
         <div class="account-name-row">
-          <span class="account-name" id="userName">Cursor 用户</span>
+          <span class="account-name" id="userName">Cursor user</span>
         </div>
-        <div class="account-email" id="userEmail">检测连接中...</div>
+        <div class="account-email" id="userEmail">Connecting...</div>
       </div>
     </div>
     <div class="account-tier" id="userTier">--</div>
   </div>
 
-  <!-- Section 1: 官方套餐配额 (Included in Plan) -->
+  <!-- Section 1: Included in plan -->
   <div class="section-title">
-    <span id="sectionQuotaTitle">官方套餐配额</span>
-    <span id="queueBadge" class="status-pill pill-amber">慢速队列</span>
+    <span id="sectionQuotaTitle">Included in plan</span>
+    <span id="queueBadge" class="status-pill pill-amber">Slow queue</span>
   </div>
 
   <!-- Card: Included Quotas (matches cursor.com Overview) -->
@@ -51,14 +51,14 @@
       <div class="pool-header">
         <div class="pool-title">
           <span class="dot dot-blue"></span>
-          <span class="pool-name">套餐内用量</span>
+          <span class="pool-name">Included usage</span>
         </div>
         <span id="includedPct" class="pool-pct">0% used</span>
       </div>
       <div class="progress-bar-bg progress-bar-hero">
         <div id="includedBar" class="progress-bar-fill fill-blue" style="width: 0%;"></div>
       </div>
-      <div class="pool-hint" id="includedHint">与 cursor.com 设置页 Overview 的 Included usage 一致</div>
+      <div class="pool-hint" id="includedHint">Matches Included usage on the cursor.com settings Overview</div>
     </div>
 
     <!-- Sub-pool 1: Cursor Models -->
@@ -73,10 +73,10 @@
       <div class="progress-bar-bg">
         <div id="cursorModelBar" class="progress-bar-fill fill-blue" style="width: 0%;"></div>
       </div>
-      <div class="pool-hint">Auto / Composer / Grok 等 Cursor 模型分池</div>
+      <div class="pool-hint">Auto, Composer, Grok, and other Cursor models</div>
     </div>
     <div id="cursorModelUnavailable" class="pool-unavailable" hidden>
-      当前套餐不包含 Cursor Models 配额池，进度条不展示。Grok / Composer 独立额度需 Pro、Pro+、Ultra 或 Start。
+      This plan does not include a Cursor Models pool, so the bar is hidden. A separate Grok / Composer allowance needs Pro, Pro+, Ultra, or Start.
     </div>
 
     <!-- Sub-pool 2: Other Models -->
@@ -91,166 +91,158 @@
       <div class="progress-bar-bg">
         <div id="otherModelBar" class="progress-bar-fill fill-slate" style="width: 100%;"></div>
       </div>
-      <div class="pool-hint">Claude / GPT 等第三方模型分池</div>
+      <div class="pool-hint">Claude, GPT, and other third-party models</div>
     </div>
     <div id="otherModelUnavailable" class="pool-unavailable" hidden>
-      当前套餐不包含 Other Models 配额池，进度条不展示。
+      This plan does not include an Other Models pool, so the bar is hidden.
     </div>
 
-    <!-- Queue Status Alert Banner (Matches Cursor "Get faster responses" banner) -->
+    <!-- Queue Status Alert Banner -->
     <div id="queueStatusBanner" class="queue-alert-banner">
       <span class="queue-alert-icon">🐢</span>
       <div class="queue-alert-content">
-        <div id="queueAlertTitle" class="queue-alert-title">当前处于慢速响应排队队列 (Slow Queue)</div>
-        <div id="queueAlertDesc" class="queue-alert-desc">基础额度已满且按量付费未开启。会话可继续正常使用，如需提速可升级 Pro+ 或开启按量付费。</div>
+        <div id="queueAlertTitle" class="queue-alert-title">Slow queue</div>
+        <div id="queueAlertDesc" class="queue-alert-desc">Included quota is used up and on-demand billing is off. You can keep working. Upgrade to Pro+ or turn on on-demand billing for faster responses.</div>
       </div>
     </div>
 
   </div>
 
-  <!-- Section 2: 周期与每周配额 -->
+  <!-- Section 2: Billing cycle and weekly quota -->
   <div class="section-title">
-    <span id="sectionCycleTitle">周期与专项周配额</span>
+    <span id="sectionCycleTitle">Billing cycle and weekly quota</span>
   </div>
 
-  <!-- Grid for Cycle & Sand -->
   <div class="grid-2col" id="cycleGrid">
-    <!-- Card: 账单重置 -->
     <div class="card sub-card">
       <div class="card-mini-header">
-        <span class="mini-title">📅 月度账单重置</span>
-        <span id="daysResetPill" class="mini-badge">13 天</span>
+        <span class="mini-title">Monthly reset</span>
+        <span id="daysResetPill" class="mini-badge">13 days</span>
       </div>
       <div class="mini-hero">
         <span id="daysCount" class="mini-hero-num">13</span>
-        <span class="mini-hero-unit">天后重置额度</span>
+        <span class="mini-hero-unit">days until reset</span>
       </div>
       <div class="progress-bar-bg mini-bar">
         <div id="cycleProgress" class="progress-bar-fill fill-cyan" style="width: 56%;"></div>
       </div>
       <div class="mini-footer">
-        <span id="cycleStart">起始: 8月24日</span>
-        <span id="cycleEnd">重置: 9月24日</span>
+        <span id="cycleStart">Start: --</span>
+        <span id="cycleEnd">Reset: --</span>
       </div>
     </div>
 
-    <!-- Card: 每周配额 (Grok Bot, not the IDE Grok model) -->
     <div id="sandCard" class="card sub-card">
       <div class="card-mini-header">
-        <span class="mini-title">⚡ Grok Bot 周额度</span>
-        <span id="sandPercentBadge" class="mini-badge badge-purple">0% 已用</span>
+        <span class="mini-title">Grok Bot weekly quota</span>
+        <span id="sandPercentBadge" class="mini-badge badge-purple">0% used</span>
       </div>
       <div class="mini-hero">
         <span id="sandUsedVal" class="mini-hero-num">0%</span>
-        <span class="mini-hero-unit">周限额已消耗</span>
+        <span class="mini-hero-unit">of weekly limit used</span>
       </div>
       <div class="progress-bar-bg mini-bar">
         <div id="sandProgress" class="progress-bar-fill fill-purple" style="width: 0%;"></div>
       </div>
       <div class="mini-footer">
-        <span>独立产品，不是编辑器 Grok 模型</span>
-        <span id="sandResetDate">刷新: --</span>
+        <span>Separate product, not the editor Grok model</span>
+        <span id="sandResetDate">Resets: --</span>
       </div>
     </div>
     <div id="sandUnavailable" class="pool-unavailable" hidden>
-      当前套餐不包含 Grok Bot 每周额度。这不是编辑器里的 Grok 4.6，而是单独的 Grok Bot 产品，需 Pro / Teams 或绑定 SuperGrok。
+      This plan does not include a weekly Grok Bot quota. That is a separate Grok Bot product, not Grok in the editor. It needs Pro, Teams, or SuperGrok.
     </div>
   </div>
 
-  <!-- Section 3: 今日实际用量与 Token 消耗 -->
+  <!-- Section 3: Today's usage -->
   <div class="section-title">
-    <span>今日实际算力消耗 (Today Activity)</span>
-    <span id="todayCostBadge" class="status-pill pill-green">$36.82 (免密全额抵扣)</span>
+    <span>Today's usage</span>
+    <span id="todayCostBadge" class="status-pill pill-green">$0.00 est.</span>
   </div>
 
   <div class="card token-card">
     <div class="token-headline">
       <div>
-        <div class="token-headline-val" id="todayTokens">60.0M</div>
-        <div class="token-headline-sub">今日总 Token 调用量</div>
+        <div class="token-headline-val" id="todayTokens">0</div>
+        <div class="token-headline-sub">Total tokens today</div>
       </div>
       <div class="cache-pill" id="cacheHitRatioPill">
-        <span>⚡ <span id="cacheHitRatio">93.8%</span> 缓存命中</span>
+        <span><span id="cacheHitRatio">0%</span> cache hit</span>
       </div>
     </div>
 
-    <!-- Segmented Proportion Bar -->
     <div class="segmented-bar">
-      <div class="seg-input" id="segInput" style="width: 6%;" title="新鲜输入"></div>
-      <div class="seg-cache" id="segCache" style="width: 93%;" title="提示词缓存读取"></div>
-      <div class="seg-output" id="segOutput" style="width: 1%;" title="模型生成"></div>
+      <div class="seg-input" id="segInput" style="width: 6%;" title="Fresh input"></div>
+      <div class="seg-cache" id="segCache" style="width: 93%;" title="Prompt cache read"></div>
+      <div class="seg-output" id="segOutput" style="width: 1%;" title="Model output"></div>
     </div>
 
-    <!-- 2x2 Grid of Metrics -->
     <div class="grid-2x2">
       <div class="tile">
         <div class="tile-label">
           <span class="tile-color-mark" style="background: var(--input-color);"></span>
-          <span>输入 Token (Input)</span>
+          <span>Input tokens</span>
         </div>
-        <div class="tile-val" id="todayInput">3.5M</div>
-        <div class="tile-sub">代码上下文注入</div>
+        <div class="tile-val" id="todayInput">0</div>
+        <div class="tile-sub">Code and context sent in</div>
       </div>
       <div class="tile">
         <div class="tile-label">
           <span class="tile-color-mark" style="background: var(--cache-color);"></span>
-          <span>提示词缓存 (Cache)</span>
+          <span>Prompt cache</span>
         </div>
-        <div class="tile-val" id="todayCache">56.3M</div>
-        <div class="tile-sub">大幅提速减免</div>
+        <div class="tile-val" id="todayCache">0</div>
+        <div class="tile-sub">Cached prompt reads</div>
       </div>
       <div class="tile">
         <div class="tile-label">
           <span class="tile-color-mark" style="background: var(--output-color);"></span>
-          <span>生成输出 (Output)</span>
+          <span>Output tokens</span>
         </div>
-        <div class="tile-val" id="todayOutput">275.1K</div>
-        <div class="tile-sub">AI 代码生成</div>
+        <div class="tile-val" id="todayOutput">0</div>
+        <div class="tile-sub">Model output</div>
       </div>
       <div class="tile">
         <div class="tile-label">
           <span class="tile-color-mark" style="background: #eab308;"></span>
-          <span>今日调用会话</span>
+          <span>Requests today</span>
         </div>
-        <div class="tile-val" id="todayRequestsCount">5,479 次</div>
-        <div class="tile-sub">会话交互总频次</div>
+        <div class="tile-val" id="todayRequestsCount">0</div>
+        <div class="tile-sub">Request count</div>
       </div>
     </div>
   </div>
 
-  <!-- Section 4: 模型用量分布 -->
+  <!-- Section 4: Model breakdown -->
   <div class="section-title">
-    <span>模型用量分布 (Models Distribution)</span>
-    <span id="totalEventsCount" style="font-size: 10.5px; font-weight: 500; color: var(--text-muted);">累计记录 5,479 次</span>
+    <span>Usage by model</span>
+    <span id="totalEventsCount" style="font-size: 10.5px; font-weight: 500; color: var(--text-muted);">0 requests logged</span>
   </div>
   <div class="card">
     <div id="modelsList" class="models-list">
-      <!-- Generated dynamically -->
     </div>
   </div>
 
-  <!-- Section 5: GitHub 编码活跃度热力图 -->
+  <!-- Section 5: Heatmap -->
   <div class="section-title">
-    <span>GitHub 活跃度热力图 (过去 90 天)</span>
-    <span id="heatHoverDate" style="font-size: 10px; font-weight: normal; color: var(--text-muted);">鼠标悬停方块查看详情</span>
+    <span>Activity heatmap (past 90 days)</span>
+    <span id="heatHoverDate" style="font-size: 10px; font-weight: normal; color: var(--text-muted);">Hover a square for details</span>
   </div>
   <div class="card heatmap-card">
     <div class="heat-summary-bar">
       <div class="heat-summary-item">
         <span class="heat-summary-dot"></span>
-        <span class="heat-summary-label">活跃:</span>
-        <span class="heat-summary-val" id="heatStatActive">-- 天</span>
+        <span class="heat-summary-label">Active:</span>
+        <span class="heat-summary-val" id="heatStatActive">-- days</span>
       </div>
       <div class="heat-summary-divider">·</div>
       <div class="heat-summary-item">
-        <span>🔥</span>
-        <span class="heat-summary-label">峰值:</span>
+        <span class="heat-summary-label">Peak:</span>
         <span class="heat-summary-val" id="heatStatPeak">--</span>
       </div>
       <div class="heat-summary-divider">·</div>
       <div class="heat-summary-item">
-        <span>⚡</span>
-        <span class="heat-summary-label">总计:</span>
+        <span class="heat-summary-label">Total:</span>
         <span class="heat-summary-val" id="heatStatTotal">--</span>
       </div>
     </div>
@@ -261,23 +253,21 @@
     <div id="heatmapTooltip" class="heatmap-tooltip"></div>
   </div>
 
-  <!-- Recent Events Section -->
   <div class="section-title">
-    <span>最近调用记录 (Recent Requests)</span>
+    <span>Recent requests</span>
   </div>
   <div class="card events-card">
     <div class="table-wrapper">
       <table class="events-table">
         <thead>
           <tr>
-            <th>时间</th>
-            <th>模型</th>
-            <th>Token (输入/输出/缓存)</th>
-            <th>算力价值</th>
+            <th>Time</th>
+            <th>Model</th>
+            <th>Tokens (in / out / cache)</th>
+            <th>Est. cost</th>
           </tr>
         </thead>
         <tbody id="eventsTbody">
-          <!-- Populated dynamically -->
         </tbody>
       </table>
     </div>

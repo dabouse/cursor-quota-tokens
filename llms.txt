@@ -50,12 +50,10 @@ It operates local-first, automatically detecting the authenticated Cursor sessio
   * **Peak Day:** Date and volume of peak single-day token consumption.
   * **Current Streak:** Unbroken chain of consecutive active coding days.
 
-### 6. Full-Stack Bilingual Localization (CN / EN)
-* **Instant Language Toggle:** 1-click `🌐 EN` / `🌐 中文` switcher on top navigation without reload.
-* **Smart Numeric Units:**
-  * Chinese: Automatic scaling in 万 (10K) and 亿 (100M).
-  * English: Standard international metric scaling in K (thousand), M (million), and B (billion).
-* **Cross-UI Consistency:** Synchronizes Status Bar, Markdown hover tooltips, QuickPick menus, and Sidebar Webviews.
+### 6. English UI
+* This fork ships the interface in English. There is no in-app language switcher.
+* Token counts use K (thousand), M (million), and B (billion).
+* The same wording is used in the status bar, hover tooltip, commands, settings, and sidebar dashboard.
 
 ### 7. Compact Status Bar & QuickPick
 * **Configurable Status Bar:** Multiple formats (`requests_and_tokens`, `requests_only`, `percent_only`, `tokens_only`).

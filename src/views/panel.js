@@ -93,25 +93,29 @@
   vscode.postMessage({ command: 'ready' });
 
   /**
-   * Format token counts with intuitive Chinese units (万 / 亿) matching Antigravity
+   * Format token counts as K / M / B.
    */
   function formatTokens(num) {
     if (num == null || isNaN(num)) return '0';
     num = Number(num);
     if (num === 0) return '0';
-    if (num >= 100000000) {
-      const yi = num / 100000000;
-      return parseFloat(yi.toFixed(yi >= 100 ? 1 : 2)) + ' 亿';
+    if (num >= 1e9) {
+      const billions = num / 1e9;
+      return parseFloat(billions.toFixed(billions >= 100 ? 1 : 2)) + 'B';
     }
-    if (num >= 10000) {
-      const wan = num / 10000;
-      return parseFloat(wan.toFixed(wan >= 100 ? 1 : 2)) + ' 万';
+    if (num >= 1e6) {
+      const millions = num / 1e6;
+      return parseFloat(millions.toFixed(millions >= 100 ? 1 : 2)) + 'M';
     }
-    return num.toLocaleString();
+    if (num >= 1e3) {
+      const thousands = num / 1e3;
+      return parseFloat(thousands.toFixed(thousands >= 100 ? 1 : 2)) + 'K';
+    }
+    return num.toLocaleString('en-US');
   }
 
   function formatNumber(num) {
-    return (num || 0).toLocaleString();
+    return (num || 0).toLocaleString('en-US');
   }
 
   function usedPercentLabel(value) {
@@ -135,13 +139,13 @@
    * Format membership tier with accurate display name and class
    */
   function formatMembership(tier) {
-    if (!tier) return { text: 'FREE 免费版', cls: 'tier-free', title: 'Free' };
+    if (!tier) return { text: 'FREE', cls: 'tier-free', title: 'Free' };
     const t = String(tier).toLowerCase().trim();
     switch (t) {
       case 'free':
-        return { text: 'FREE 免费版', cls: 'tier-free', title: 'Free' };
+        return { text: 'FREE', cls: 'tier-free', title: 'Free' };
       case 'hobby':
-        return { text: 'HOBBY 免费版', cls: 'tier-free', title: 'Hobby' };
+        return { text: 'HOBBY', cls: 'tier-free', title: 'Hobby' };
       case 'pro':
         return { text: 'PRO $20/MO', cls: 'tier-pro', title: 'Pro' };
       case 'pro_plus':
@@ -150,7 +154,7 @@
       case 'business':
         return { text: 'BUSINESS $40/MO', cls: 'tier-business', title: 'Business' };
       case 'enterprise':
-        return { text: 'ENTERPRISE 企业版', cls: 'tier-enterprise', title: 'Enterprise' };
+        return { text: 'ENTERPRISE', cls: 'tier-enterprise', title: 'Enterprise' };
       default:
         const capitalized = t.charAt(0).toUpperCase() + t.slice(1);
         return { text: t.toUpperCase(), cls: 'tier-pro', title: capitalized };
@@ -162,7 +166,7 @@
 
     // 1. Account Profile
     if (data.profile) {
-      userName.textContent = data.profile.name || 'Cursor 用户';
+      userName.textContent = data.profile.name || 'Cursor user';
       userEmail.textContent = data.profile.email || '';
 
       const tierInfo = formatMembership(data.profile.membershipType);
@@ -170,7 +174,7 @@
       userTier.className = `account-tier ${tierInfo.cls}`;
 
       if (sectionQuotaTitle) {
-        sectionQuotaTitle.textContent = `官方套餐配额 (Included in ${tierInfo.title})`;
+        sectionQuotaTitle.textContent = `Included in ${tierInfo.title}`;
       }
 
       if (data.profile.avatarUrl) {
@@ -218,19 +222,19 @@
       const isSlow = q.isQueueSlow ?? (totalPct >= 100 && !q.onDemandEnabled);
 
       if (isSlow) {
-        queueBadge.textContent = '慢速队列中';
+        queueBadge.textContent = 'Slow queue';
         queueBadge.className = 'status-pill pill-amber';
         queueStatusBanner.className = 'queue-alert-banner';
         queueStatusBanner.querySelector('.queue-alert-icon').textContent = '🐢';
-        queueAlertTitle.textContent = '当前处于慢速响应排队队列 (Slow Queue)';
-        queueAlertDesc.textContent = '基础额度已满且按量付费未开启。代码会话可继续正常使用，如需高速响应可升级 Pro+ 或开启按量付费。';
+        queueAlertTitle.textContent = 'Slow queue';
+        queueAlertDesc.textContent = 'Included quota is used up and on-demand billing is off. You can keep working. Upgrade to Pro+ or turn on on-demand billing for faster responses.';
       } else {
-        queueBadge.textContent = '高速通道';
+        queueBadge.textContent = 'Fast';
         queueBadge.className = 'status-pill pill-green';
         queueStatusBanner.className = 'queue-alert-banner fast';
         queueStatusBanner.querySelector('.queue-alert-icon').textContent = '⚡';
-        queueAlertTitle.textContent = '高速通道正常生效中 (Fast Mode)';
-        queueAlertDesc.textContent = '当前请求享有官方最高优先级高速模型算力响应。';
+        queueAlertTitle.textContent = 'Fast mode';
+        queueAlertDesc.textContent = 'Requests are served at this plan\'s highest priority.';
       }
 
 
@@ -238,9 +242,9 @@
       // Billing Cycle
       const days = q.daysUntilReset || 0;
       daysCount.textContent = String(days);
-      daysResetPill.textContent = `${days} 天`;
-      if (cycleStart) cycleStart.textContent = q.billingCycleStart ? `起始: ${q.billingCycleStart}` : '起始: --';
-      if (cycleEnd) cycleEnd.textContent = q.resetDateStr ? `重置: ${q.resetDateStr}` : '重置: --';
+      daysResetPill.textContent = `${days} days`;
+      if (cycleStart) cycleStart.textContent = q.billingCycleStart ? `Start: ${q.billingCycleStart}` : 'Start: --';
+      if (cycleEnd) cycleEnd.textContent = q.resetDateStr ? `Reset: ${q.resetDateStr}` : 'Reset: --';
 
       const daysPassed = Math.max(0, 30 - days);
       const cycleProgPct = Math.min(100, Math.max(0, Math.round((daysPassed / 30) * 100)));
@@ -252,16 +256,16 @@
     if (sandCard) sandCard.hidden = !grokBotIncluded;
     if (sandUnavailable) sandUnavailable.hidden = grokBotIncluded;
     if (sectionCycleTitle) {
-      sectionCycleTitle.textContent = grokBotIncluded ? '周期与 Grok Bot 周配额' : '账单周期';
+      sectionCycleTitle.textContent = grokBotIncluded ? 'Billing cycle and Grok Bot weekly quota' : 'Billing cycle';
     }
     if (grokBotIncluded && data.sandUsage) {
       const s = data.sandUsage;
       const sPct = s.usagePercent || 0;
-      sandPercentBadge.textContent = `${sPct}% 已用`;
+      sandPercentBadge.textContent = `${sPct}% used`;
       sandUsedVal.textContent = `${sPct}%`;
       sandProgress.style.width = `${Math.min(100, Math.max(0, sPct))}%`;
       if (s.resetDateStr && sandResetDate) {
-        sandResetDate.textContent = `刷新: ${s.resetDateStr}`;
+        sandResetDate.textContent = `Resets: ${s.resetDateStr}`;
       }
     }
 
@@ -272,10 +276,10 @@
       todayInput.textContent = formatTokens(td.inputTokens);
       todayCache.textContent = formatTokens(td.cacheTokens);
       todayOutput.textContent = formatTokens(td.outputTokens);
-      todayRequestsCount.textContent = `${formatNumber(td.requestsCount || 0)} 次`;
+      todayRequestsCount.textContent = formatNumber(td.requestsCount || 0);
 
       const costDollars = (td.costCents / 100).toFixed(2);
-      todayCostBadge.textContent = `$${costDollars} (免密全额抵扣)`;
+      todayCostBadge.textContent = `$${costDollars} est.`;
 
       // Calculate cache hit ratio
       const denom = (td.inputTokens + td.cacheTokens);
@@ -296,7 +300,7 @@
 
     // 5. Models Distribution
     if (data.models && Array.isArray(data.models)) {
-      totalEventsCount.textContent = `累计记录 ${formatNumber(data.tokens?.totalCount || 0)} 次`;
+      totalEventsCount.textContent = `${formatNumber(data.tokens?.totalCount || 0)} requests logged`;
       modelsList.innerHTML = '';
 
       data.models.forEach((m, idx) => {
@@ -383,7 +387,7 @@
       curr.setDate(curr.getDate() + 1);
     }
 
-    heatStatActive.textContent = `${activeDays} 天`;
+    heatStatActive.textContent = `${activeDays} days`;
     heatStatPeak.textContent = `${formatTokens(maxTokens)} tok`;
     heatStatTotal.textContent = `${formatTokens(totalTokens)} tok`;
 
@@ -402,8 +406,8 @@
       }
 
       cell.addEventListener('mouseenter', e => {
-        heatHoverDate.textContent = `${item.date}: ${formatNumber(item.tokens)} Tokens (${item.requests} 次会话)`;
-        heatmapTooltip.innerHTML = `<strong>${item.date}</strong><br/>${formatNumber(item.tokens)} Tokens<br/>${item.requests} 次请求`;
+        heatHoverDate.textContent = `${item.date}: ${formatNumber(item.tokens)} tokens (${item.requests} requests)`;
+        heatmapTooltip.innerHTML = `<strong>${item.date}</strong><br/>${formatNumber(item.tokens)} tokens<br/>${item.requests} requests`;
         heatmapTooltip.style.opacity = '1';
         const rect = cell.getBoundingClientRect();
         heatmapTooltip.style.left = `${rect.left}px`;
@@ -412,7 +416,7 @@
 
       cell.addEventListener('mouseleave', () => {
         heatmapTooltip.style.opacity = '0';
-        heatHoverDate.textContent = '鼠标悬停方块查看详情';
+        heatHoverDate.textContent = 'Hover a square for details';
       });
 
       heatmapGrid.appendChild(cell);

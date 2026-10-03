@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/mxllAs/cursor-quota-tokens/releases"><img src="https://img.shields.io/github/v/release/mxllAs/cursor-quota-tokens?color=38bdf8&label=Release" alt="Release"></a>
+  <a href="https://github.com/dabouse/cursor-quota-tokens/releases"><img src="https://img.shields.io/github/v/release/dabouse/cursor-quota-tokens?color=38bdf8&label=Release" alt="Release"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"></a>
   <img src="https://img.shields.io/badge/Platform-Cursor%20%7C%20VS%20Code-purple.svg" alt="Platform">
 </p>
@@ -17,6 +17,8 @@
 <p align="center">
   <strong>English</strong> | <a href="README.zh-CN.md">简体中文</a>
 </p>
+
+> **English UI fork** of [mxllAs/cursor-quota-tokens](https://github.com/mxllAs/cursor-quota-tokens). Upstream ships the interface in Chinese only. This fork translates the sidebar, dashboard, status bar, commands, and settings to English. Behavior is otherwise unchanged. MIT, original author [isArray](https://github.com/mxllAs).
 
 ---
 
@@ -49,27 +51,26 @@
 
 ## 🚀 Installation
 
-### Option 1: One-Click from VS Code / Cursor Marketplace (Recommended)
-1. Open the Extensions view (`Ctrl+Shift+X` or `Cmd+Shift+X`);
-2. Search for:
-   ```
-   Cursor Quota & Token Monitor
-   ```
-3. Click **Install**.
+The marketplace listing is the Chinese upstream extension. Install this fork from the VSIX so the interface stays in English. It uses the same extension id (`isArray.cursor-quota-tokens`) and replaces the copy you already have.
 
-### Option 2: Install from VSIX
-1. Download the latest `.vsix` file from [GitHub Releases](https://github.com/mxllAs/cursor-quota-tokens/releases) (e.g. `cursor-quota-tokens-1.0.10.vsix`);
+### Option 1: Install from VSIX
+1. Download `releases/cursor-quota-tokens-1.0.14.vsix` from this fork (or the latest `.vsix` from [GitHub Releases](https://github.com/dabouse/cursor-quota-tokens/releases));
 2. In Cursor or VS Code, press `Ctrl+Shift+P` (`Cmd+Shift+P` on macOS);
 3. Type and run:
    ```
    Extensions: Install from VSIX...
    ```
 4. Select the downloaded `.vsix` file.
+5. Reload the window.
 
-### Option 3: Command Line
+### Option 2: Command Line
 ```bash
-cursor --install-extension releases/cursor-quota-tokens-1.0.10.vsix --force
+cursor --install-extension releases/cursor-quota-tokens-1.0.14.vsix --force
+# or, in VS Code:
+code --install-extension releases/cursor-quota-tokens-1.0.14.vsix --force
 ```
+
+If the editor later offers an update from the marketplace, that update is the Chinese upstream. Skip it, or turn off auto-update for this extension.
 
 ---
 

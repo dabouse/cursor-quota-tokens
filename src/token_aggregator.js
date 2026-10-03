@@ -251,17 +251,17 @@ class TokenAggregator {
       const cycleEnd = summary?.billingCycleEnd ? new Date(summary.billingCycleEnd) : (currentPeriod?.billingCycleEnd ? new Date(parseInt(currentPeriod.billingCycleEnd, 10)) : null);
 
       let daysUntilReset = 0;
-      let resetDateStr = '9月24日';
+      let resetDateStr = '';
       if (cycleEnd) {
         const diffMs = cycleEnd.getTime() - now;
         daysUntilReset = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
-        resetDateStr = `${cycleEnd.getMonth() + 1}月${cycleEnd.getDate()}日`;
+        resetDateStr = this.formatMonthDay(cycleEnd);
       }
 
-      let sandResetDateStr = '每周自动刷新';
+      let sandResetDateStr = 'Resets weekly';
       if (sand?.nextResetTimestampUtc) {
         const sandD = new Date(sand.nextResetTimestampUtc);
-        sandResetDateStr = `${sandD.getMonth() + 1}月${sandD.getDate()}日`;
+        sandResetDateStr = this.formatMonthDay(sandD);
       }
 
       const hasGrokBotWeekly = this.hasGrokBotWeekly(membershipType, sand);
@@ -292,7 +292,7 @@ class TokenAggregator {
           onDemandEnabled,
           hasCursorModelsPool,
           hasOtherModelsPool,
-          billingCycleStart: cycleStart ? `${cycleStart.getMonth() + 1}月${cycleStart.getDate()}日` : '',
+          billingCycleStart: cycleStart ? this.formatMonthDay(cycleStart) : '',
           billingCycleEnd: cycleEnd ? resetDateStr : '',
           resetDateStr,
           daysUntilReset
@@ -328,6 +328,10 @@ class TokenAggregator {
       }
       throw e;
     }
+  }
+
+  formatMonthDay(date) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
   hasGrokBotWeekly(membershipType, sand) {
