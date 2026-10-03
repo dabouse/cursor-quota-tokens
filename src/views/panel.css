@@ -354,13 +354,39 @@ body.vscode-light .account-tier.tier-enterprise {
   flex-direction: column;
 }
 
-.pool-item[hidden],
-.pool-unavailable[hidden] {
+[hidden] {
   display: none !important;
 }
 
 .pool-item-sub {
   margin-top: 14px;
+}
+
+.super-grok-products {
+  margin-top: 14px;
+}
+
+.super-grok-products[hidden] {
+  display: none !important;
+}
+
+.sg-row {
+  margin-top: 10px;
+}
+
+.sg-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.sg-cli {
+  margin-left: 6px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
 }
 
 .pool-unavailable {
@@ -497,6 +523,10 @@ body.vscode-light .account-tier.tier-enterprise {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.grid-2col.single {
+  grid-template-columns: 1fr;
 }
 
 .card[hidden] {

@@ -41,7 +41,7 @@
 
   <!-- Section 1: Included in plan -->
   <div class="section-title">
-    <span id="sectionQuotaTitle">Included in plan</span>
+    <span id="sectionQuotaTitle">SuperGrok</span>
     <span id="queueBadge" class="status-pill pill-amber">Slow queue</span>
   </div>
 
@@ -51,14 +51,29 @@
       <div class="pool-header">
         <div class="pool-title">
           <span class="dot dot-blue"></span>
-          <span class="pool-name">Included usage</span>
+          <span class="pool-name" id="includedName">Weekly limit</span>
         </div>
         <span id="includedPct" class="pool-pct">0% used</span>
       </div>
       <div class="progress-bar-bg progress-bar-hero">
         <div id="includedBar" class="progress-bar-fill fill-blue" style="width: 0%;"></div>
       </div>
-      <div class="pool-hint" id="includedHint">Matches Included usage on the cursor.com settings Overview</div>
+      <div class="pool-hint" id="includedHint">Shared SuperGrok pool. Grok CLI counts in this total and in Grok Build.</div>
+    </div>
+    <div id="superGrokProducts" class="super-grok-products" hidden></div>
+
+    <div id="planTotalPool" class="pool-item pool-item-sub" hidden>
+      <div class="pool-header">
+        <div class="pool-title">
+          <span class="dot dot-slate"></span>
+          <span class="pool-name">Included total usage</span>
+        </div>
+        <span id="planTotalPct" class="pool-pct">0% used</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div id="planTotalBar" class="progress-bar-fill fill-slate" style="width: 0%;"></div>
+      </div>
+      <div class="pool-hint" id="planTotalHint">Separate from the weekly Grok Bot limit.</div>
     </div>
 
     <!-- Sub-pool 1: Cursor Models -->
@@ -76,7 +91,7 @@
       <div class="pool-hint">Auto, Composer, Grok, and other Cursor models</div>
     </div>
     <div id="cursorModelUnavailable" class="pool-unavailable" hidden>
-      This plan does not include a Cursor Models pool, so the bar is hidden. A separate Grok / Composer allowance needs Pro, Pro+, Ultra, or Start.
+      This plan has no separate Cursor Models pool.
     </div>
 
     <!-- Sub-pool 2: Other Models -->
@@ -116,7 +131,7 @@
   <div class="grid-2col" id="cycleGrid">
     <div class="card sub-card">
       <div class="card-mini-header">
-        <span class="mini-title">Monthly reset</span>
+        <span class="mini-title" id="cycleKind">Weekly reset</span>
         <span id="daysResetPill" class="mini-badge">13 days</span>
       </div>
       <div class="mini-hero">
@@ -134,7 +149,7 @@
 
     <div id="sandCard" class="card sub-card">
       <div class="card-mini-header">
-        <span class="mini-title">Grok Bot weekly quota</span>
+        <span class="mini-title">Grok Bot weekly limit</span>
         <span id="sandPercentBadge" class="mini-badge badge-purple">0% used</span>
       </div>
       <div class="mini-hero">
@@ -145,12 +160,12 @@
         <div id="sandProgress" class="progress-bar-fill fill-purple" style="width: 0%;"></div>
       </div>
       <div class="mini-footer">
-        <span>Separate product, not the editor Grok model</span>
+        <span>Cursor Grok Bot meter</span>
         <span id="sandResetDate">Resets: --</span>
       </div>
     </div>
     <div id="sandUnavailable" class="pool-unavailable" hidden>
-      This plan does not include a weekly Grok Bot quota. That is a separate Grok Bot product, not Grok in the editor. It needs Pro, Teams, or SuperGrok.
+      No Cursor Grok Bot weekly limit on this account.
     </div>
   </div>
 

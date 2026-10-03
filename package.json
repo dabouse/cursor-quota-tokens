@@ -2,7 +2,7 @@
   "name": "cursor-quota-tokens",
   "displayName": "Cursor Quota & Token Monitor",
   "description": "Real-time monitor for Cursor fast requests, reset countdown, Grok/Sand weekly quota, and detailed token metrics.",
-  "version": "1.0.14",
+  "version": "1.0.18",
   "publisher": "isArray",
   "icon": "images/icon.png",
   "license": "MIT",

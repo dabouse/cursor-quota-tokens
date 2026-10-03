@@ -48,7 +48,10 @@ class StatusBarManager {
     const { used, limit, remaining, percentUsed, daysUntilReset, hasNumericLimit, isQueueSlow } = data.quota;
     const todayTokens = data.tokens?.today?.totalTokens || 0;
     const todayTokensStr = this.formatTokens(todayTokens);
-    const usedPct = Number.isFinite(Number(percentUsed)) ? Math.round(Number(percentUsed)) : 0;
+    const sg = data.superGrok && data.superGrok.ok ? data.superGrok : null;
+    const usedPct = sg
+      ? Math.round(Number(sg.percentUsed) || 0)
+      : (Number.isFinite(Number(percentUsed)) ? Math.round(Number(percentUsed)) : 0);
     const remainingPct = Math.max(0, 100 - usedPct);
     const exhausted = !!(isQueueSlow || (hasNumericLimit && remaining <= 0 && usedPct >= 100));
 
@@ -75,6 +78,14 @@ class StatusBarManager {
         break;
     }
 
+    if (sg) {
+      const build = sg.buildPercent == null ? '' : ` · Build ${sg.buildPercent}%`;
+      const reset = this.formatResetLabel(sg);
+      const days = sg.daysUntilReset == null
+        ? ''
+        : ` · ${sg.daysUntilReset} ${sg.daysUntilReset === 1 ? 'day' : 'days'}`;
+      label = `$(pulse) SuperGrok ${usedPct}%${build}${days}${reset ? ` · ${reset}` : ''}`;
+    }
     this.item.text = label;
 
     // Severity color (gentle warning instead of alarming crash-red)
@@ -88,10 +99,33 @@ class StatusBarManager {
     md.isTrusted = true;
     md.supportHtml = true;
 
-    const membership = (data.profile?.membershipType || 'free').toUpperCase();
-    md.appendMarkdown(`### **Cursor quota and tokens**\n\n`);
+    const membership = sg?.planText || (data.profile?.membershipType || 'free').toUpperCase();
+    md.appendMarkdown(`### **${sg ? 'SuperGrok weekly limit' : 'Cursor quota and tokens'}**\n\n`);
     md.appendMarkdown(`**Account**: ${data.profile?.name || 'Cursor user'} (${membership})\n\n`);
     md.appendMarkdown(`---\n\n`);
+
+    if (sg) {
+      md.appendMarkdown(`**SuperGrok**: **${usedPct}% used**\n\n`);
+      for (const product of sg.products || []) {
+        const cli = product.isCli ? ' (Grok CLI)' : '';
+        md.appendMarkdown(`**${product.name}**${cli}: ${product.percent}%\n\n`);
+      }
+      if (sg.resetAt || sg.resetDateStr) {
+        const reset = this.formatResetLabel(sg) || sg.resetDateStr;
+        const days = sg.daysUntilReset === 0 ? 'today' : `${sg.daysUntilReset} days`;
+        md.appendMarkdown(`**Reset**: **${days}** (${reset})\n\n`);
+      }
+      md.appendMarkdown(`---\n\n`);
+      md.appendMarkdown(`**Tokens today**: **${todayTokens.toLocaleString('en-US')}**\n\n`);
+      if (data.tokens?.today?.costCents > 0) {
+        md.appendMarkdown(`**Estimated value today**: **$${(data.tokens.today.costCents / 100).toFixed(2)}**\n\n`);
+      }
+      md.appendMarkdown(`---\n\n`);
+      md.appendMarkdown(`[Open the usage dashboard](command:cursorQuota.openDashboard)`);
+      this.item.tooltip = md;
+      this.item.show();
+      return;
+    }
 
     if (exhausted) {
       md.appendMarkdown(`**Mode**: **Slow queue** (included quota used up)\n\n`);
@@ -127,6 +161,20 @@ class StatusBarManager {
 
     this.item.tooltip = md;
     this.item.show();
+  }
+
+  /**
+   * Reset date for the status bar. The clock time is included only on the reset day.
+   */
+  formatResetLabel(sg) {
+    const date = sg?.resetAt ? new Date(sg.resetAt) : null;
+    if (!date || Number.isNaN(date.getTime())) return '';
+    const dateOnly = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (sg.daysUntilReset === 0) {
+      const time = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+      return `${dateOnly}, ${time}`;
+    }
+    return dateOnly;
   }
 
   showLoading() {

@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { getSuperGrokUsage } = require('./grok_billing.js');
 
 class TokenAggregator {
   constructor(api, storagePath = null) {
@@ -193,8 +194,9 @@ class TokenAggregator {
         m.percent = grandTotalTokens > 0 ? ((m.totalTokens / grandTotalTokens) * 100).toFixed(1) : '0.0';
       }
 
-      // Recent events formatted
-      const recentEvents = events.slice(0, 30).map(ev => {
+      // Recent events that actually spent tokens. The newest rows are often
+      // zero-token Grok CLI automation pings, which hid the real requests.
+      const recentEvents = events.map(ev => {
         const ts = parseInt(ev.timestamp, 10);
         const d = new Date(ts);
         const inTok = ev.tokenUsage?.inputTokens || 0;
@@ -203,7 +205,7 @@ class TokenAggregator {
         const costCents = ev.tokenUsage?.totalCents || 0;
         return {
           timestamp: ts,
-          timeStr: d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+          timeStr: d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
           dateStr: `${d.getMonth() + 1}/${d.getDate()}`,
           model: this.formatModelName(ev.model || 'default'),
           inputTokens: inTok,
@@ -213,7 +215,7 @@ class TokenAggregator {
           costStr: `$${(costCents / 100).toFixed(4)}`,
           conversationId: ev.conversationId || ''
         };
-      });
+      }).filter(ev => ev.totalTokens > 0).slice(0, 25);
 
       // Assemble quota: usage-summary is what cursor.com Overview uses.
       // get-current-period-usage.displayMessage uses includedSpend/limit and
@@ -245,7 +247,21 @@ class TokenAggregator {
       const membershipType = String(summary?.membershipType || 'free').toLowerCase();
       const { hasCursorModelsPool, hasOtherModelsPool } = this.detectUsagePools(membershipType);
       const onDemandEnabled = summary?.individualUsage?.onDemand?.enabled ?? false;
-      const isQueueSlow = totalPercentUsed >= 100 && !onDemandEnabled;
+      const hasGrokBotWeekly = this.hasGrokBotWeekly(membershipType, sand);
+      const grokBotPercent = hasGrokBotWeekly ? this.normalizeSandPercent(sand?.usagePercent) : null;
+
+      let superGrok = null;
+      try {
+        superGrok = await getSuperGrokUsage();
+      } catch (error) {
+        console.warn('[TokenAggregator] SuperGrok usage failed:', error.message);
+        superGrok = { ok: false, error: error.message };
+      }
+
+      const primaryPercent = superGrok?.ok ? superGrok.percentUsed : totalPercentUsed;
+      const isQueueSlow = superGrok?.ok
+        ? superGrok.percentUsed >= 100
+        : totalPercentUsed >= 100 && !onDemandEnabled;
 
       const cycleStart = summary?.billingCycleStart ? new Date(summary.billingCycleStart) : (currentPeriod?.billingCycleStart ? new Date(parseInt(currentPeriod.billingCycleStart, 10)) : null);
       const cycleEnd = summary?.billingCycleEnd ? new Date(summary.billingCycleEnd) : (currentPeriod?.billingCycleEnd ? new Date(parseInt(currentPeriod.billingCycleEnd, 10)) : null);
@@ -259,12 +275,12 @@ class TokenAggregator {
       }
 
       let sandResetDateStr = 'Resets weekly';
+      let sandDaysUntilReset = null;
       if (sand?.nextResetTimestampUtc) {
         const sandD = new Date(sand.nextResetTimestampUtc);
         sandResetDateStr = this.formatMonthDay(sandD);
+        sandDaysUntilReset = Math.max(0, Math.ceil((sandD.getTime() - now) / (1000 * 60 * 60 * 24)));
       }
-
-      const hasGrokBotWeekly = this.hasGrokBotWeekly(membershipType, sand);
 
       const aggregated = {
         timestamp: now,
@@ -280,10 +296,13 @@ class TokenAggregator {
           limit: planLimit,
           remaining: planLimit > 0 ? Math.max(0, planLimit - includedSpend) : 0,
           hasNumericLimit: planLimit > 0,
-          percentUsed: totalPercentUsed,
+          percentUsed: primaryPercent,
           autoPercentUsed,
           apiPercentUsed,
           totalPercentUsed,
+          primaryIsSuperGrok: !!superGrok?.ok,
+          includedTotalMessage: summary?.autoModelSelectedDisplayMessage || currentPeriod?.autoModelSelectedDisplayMessage || '',
+          apiUsageMessage: summary?.namedModelSelectedDisplayMessage || currentPeriod?.namedModelSelectedDisplayMessage || '',
           includedSpend,
           bonusSpend,
           totalSpend,
@@ -299,11 +318,14 @@ class TokenAggregator {
         },
         sandUsage: {
           included: hasGrokBotWeekly,
-          usagePercent: hasGrokBotWeekly ? this.normalizeSandPercent(sand?.usagePercent) : 0,
+          usagePercent: grokBotPercent != null ? grokBotPercent : 0,
           nextResetUtc: sand?.nextResetTimestampUtc || null,
           resetDateStr: sandResetDateStr,
-          hasAvailableUsage: sand?.hasAvailableUsage ?? false
+          daysUntilReset: sandDaysUntilReset,
+          hasAvailableUsage: sand?.hasAvailableUsage ?? false,
+          planLabel: sand?.grokPlanLabel || 'Grok Bot'
         },
+        superGrok,
         tokens: {
           today: todayStats,
           month: monthStats,

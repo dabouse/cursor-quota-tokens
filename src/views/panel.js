@@ -13,8 +13,15 @@
   const sectionQuotaTitle = document.getElementById('sectionQuotaTitle');
 
   const queueBadge = document.getElementById('queueBadge');
+  const includedName = document.getElementById('includedName');
   const includedPct = document.getElementById('includedPct');
   const includedBar = document.getElementById('includedBar');
+  const includedHint = document.getElementById('includedHint');
+  const superGrokProducts = document.getElementById('superGrokProducts');
+  const planTotalPool = document.getElementById('planTotalPool');
+  const planTotalPct = document.getElementById('planTotalPct');
+  const planTotalBar = document.getElementById('planTotalBar');
+  const planTotalHint = document.getElementById('planTotalHint');
   const cursorModelPct = document.getElementById('cursorModelPct');
   const cursorModelBar = document.getElementById('cursorModelBar');
   const cursorModelPool = document.getElementById('cursorModelPool');
@@ -39,6 +46,8 @@
   const sandCard = document.getElementById('sandCard');
   const sandUnavailable = document.getElementById('sandUnavailable');
   const sectionCycleTitle = document.getElementById('sectionCycleTitle');
+  const cycleGrid = document.getElementById('cycleGrid');
+  const cycleKind = document.getElementById('cycleKind');
 
   const todayCostBadge = document.getElementById('todayCostBadge');
   const todayTokens = document.getElementById('todayTokens');
@@ -188,15 +197,69 @@
       }
     }
 
-    // 2. Quota Main Card (Included in Pro)
-    if (data.quota) {
+    // 2. SuperGrok weekly pool. Grok CLI spends this shared total, and the Grok Build slice.
+    const sg = data.superGrok;
+    if (sg && sg.ok) {
+      if (sectionQuotaTitle) sectionQuotaTitle.textContent = 'SuperGrok';
+      if (userTier) {
+        userTier.textContent = sg.planText || 'SUPERGROK $30';
+        userTier.className = 'account-tier tier-pro';
+      }
+      if (queueBadge) queueBadge.hidden = true;
+      if (includedName) includedName.textContent = 'Weekly limit';
+      if (includedPct) includedPct.textContent = usedPercentLabel(sg.percentUsed);
+      if (includedBar) includedBar.style.width = barWidth(sg.percentUsed);
+      if (includedHint) {
+        const when = sg.resetDateStr ? ` (${sg.resetDateStr})` : '';
+        const days = sg.daysUntilReset == null ? 'every week' : `in ${sg.daysUntilReset} days${when}`;
+        includedHint.textContent = `Shared pool. Grok CLI counts in this total and in Grok Build. Resets ${days}.`;
+      }
+      if (superGrokProducts) {
+        superGrokProducts.hidden = false;
+        superGrokProducts.innerHTML = (sg.products || []).map((product) => `
+          <div class="sg-row">
+            <div class="sg-head">
+              <span>${escapeHtml(product.name)}${product.isCli ? '<span class="sg-cli">Grok CLI</span>' : ''}</span>
+              <span>${product.percent}%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill ${product.isCli ? 'fill-blue' : 'fill-slate'}" style="width: ${barWidth(product.percent)};"></div>
+            </div>
+          </div>
+        `).join('');
+      }
+      if (planTotalPool) planTotalPool.hidden = true;
+      if (cursorModelPool) cursorModelPool.hidden = true;
+      if (cursorModelUnavailable) cursorModelUnavailable.hidden = true;
+      if (otherModelPool) otherModelPool.hidden = true;
+      if (otherModelUnavailable) otherModelUnavailable.hidden = true;
+      if (queueStatusBanner) queueStatusBanner.hidden = true;
+      if (sectionCycleTitle) sectionCycleTitle.parentElement.hidden = false;
+      if (cycleGrid) cycleGrid.hidden = false;
+      if (sectionCycleTitle) sectionCycleTitle.textContent = 'Billing cycle';
+      if (cycleKind) cycleKind.textContent = 'Weekly reset';
+      const daysLeft = sg.daysUntilReset || 0;
+      if (daysCount) daysCount.textContent = String(daysLeft);
+      if (daysResetPill) daysResetPill.textContent = `${daysLeft} days`;
+      if (cycleStart) cycleStart.textContent = sg.periodStartStr ? `Start: ${sg.periodStartStr}` : 'Start: --';
+      if (cycleEnd) cycleEnd.textContent = sg.resetDateStr ? `Reset: ${sg.resetDateStr}` : 'Reset: --';
+      if (cycleProgress) cycleProgress.style.width = `${sg.periodPercent || 0}%`;
+    } else if (data.quota) {
       const q = data.quota;
       const totalPct = q.totalPercentUsed !== undefined ? q.totalPercentUsed : q.percentUsed;
       const autoPct = q.autoPercentUsed !== undefined ? q.autoPercentUsed : totalPct;
       const apiPct = q.apiPercentUsed !== undefined ? q.apiPercentUsed : totalPct;
 
+      if (includedName) includedName.textContent = 'Included usage';
       if (includedPct) includedPct.textContent = usedPercentLabel(totalPct);
       if (includedBar) includedBar.style.width = barWidth(totalPct);
+      if (includedHint) {
+        includedHint.textContent = sg && sg.error
+          ? sg.error
+          : (q.includedTotalMessage || 'Included usage reported by Cursor');
+      }
+      if (planTotalPool) planTotalPool.hidden = true;
+      if (superGrokProducts) superGrokProducts.hidden = true;
 
       const membership = String(data.profile?.membershipType || '').toLowerCase();
       const hasCursorModelsPool = q.hasCursorModelsPool !== undefined
@@ -217,6 +280,8 @@
       if (hasOtherModelsPool) {
         otherModelPct.textContent = usedPercentLabel(apiPct);
         otherModelBar.style.width = barWidth(apiPct);
+        const otherHint = otherModelPool ? otherModelPool.querySelector('.pool-hint') : null;
+        if (otherHint && q.apiUsageMessage) otherHint.textContent = q.apiUsageMessage;
       }
 
       const isSlow = q.isQueueSlow ?? (totalPct >= 100 && !q.onDemandEnabled);
@@ -251,23 +316,9 @@
       if (cycleProgress) cycleProgress.style.width = `${cycleProgPct}%`;
     }
 
-    // 3. Grok Bot weekly quota (not the IDE Grok model)
-    const grokBotIncluded = !!(data.sandUsage && data.sandUsage.included);
-    if (sandCard) sandCard.hidden = !grokBotIncluded;
-    if (sandUnavailable) sandUnavailable.hidden = grokBotIncluded;
-    if (sectionCycleTitle) {
-      sectionCycleTitle.textContent = grokBotIncluded ? 'Billing cycle and Grok Bot weekly quota' : 'Billing cycle';
-    }
-    if (grokBotIncluded && data.sandUsage) {
-      const s = data.sandUsage;
-      const sPct = s.usagePercent || 0;
-      sandPercentBadge.textContent = `${sPct}% used`;
-      sandUsedVal.textContent = `${sPct}%`;
-      sandProgress.style.width = `${Math.min(100, Math.max(0, sPct))}%`;
-      if (s.resetDateStr && sandResetDate) {
-        sandResetDate.textContent = `Resets: ${s.resetDateStr}`;
-      }
-    }
+    if (sandCard) sandCard.hidden = true;
+    if (sandUnavailable) sandUnavailable.hidden = true;
+    if (cycleGrid) cycleGrid.classList.add('single');
 
     // 4. Today Tokens & Metrics
     if (data.tokens && data.tokens.today) {
